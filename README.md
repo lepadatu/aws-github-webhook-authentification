@@ -1,4 +1,4 @@
-# aws-github-webhook-authentification
+# GitHub WebHooks Authentication Using AWS Lambda
 A serverless way to authenticate github webhooks, primarily for usage with AWS private resources (e.g. private Jenkins instance) as an alternative to ngrok.
 
 I will consider Jenkins running on ec2 as a typical example here for GitHub webhook consumer although the code is generic.
@@ -19,7 +19,8 @@ The solution presented here de-couples the GitHub webhook authentication part fr
 
 The code hosted in [authorizer.py](authorizer.py) is purposed to run in a lambda function deployed in a VPC. This VPC does not need to coincide with Jenkins VPC as in the diagram below, but must be able to reach Jenkins instance in order to forward the webhook POST requests. As long as there is connectivity between lambda ENI and the service that processes the webhook (Jenkins), it should work.
 
-![Project in the spotlight 2](https://github.com/lepadatu/aws-github-webhook-authentification/assets/16731864/741fd950-0230-434a-936e-08eddec68673)
+![Project in the spotlight1](https://github.com/lepadatu/aws-github-webhook-authentification/assets/16731864/abf32bfa-7877-4e44-80a9-89488d836089)
+
 
 The lambda functions requires 3 environment variables:
 1. `SECRET` is the shared secret with GitHub webhook.
@@ -30,13 +31,16 @@ Since they contain sensitive information, it is highly recommended to use CMK (C
 https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#customer-cmk
 https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-encryption
 https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html
+
 Obviously, the lambda function will need to be able to decrypt the above environment variables.
 
 In order to prevent abuse, it is recommended to limit concurrency as well.
 
+# Limitations
+
 The lambda function has been tested with `Python 3.9`.
 
-Only json Github webhooks are supported.
+Only `application/json` Github webhooks content type is supported.
 
 # Design Considerations
 Initially I have considered AWS API gateway as the best approach for the task together with proxy integration and lambda authorizer. In order to authenticate the webhook, one needs to access the payload in order to compute the HMAC signature. However, due to API Gateway limitations, the lambda authorizer cannot access the payload of the incoming request. 
