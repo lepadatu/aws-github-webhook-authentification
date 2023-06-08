@@ -45,6 +45,6 @@ Only `application/json` Github webhooks content type is supported.
 # Design Considerations
 Initially I have considered AWS API gateway as the best approach for the task together with proxy integration and lambda authorizer. In order to authenticate the webhook, one needs to access the payload in order to compute the HMAC signature. However, due to API Gateway limitations, the lambda authorizer cannot access the payload of the incoming request. 
 
-Another option would be to skip the API gatway authorization part and use the API gateway to proxy the request to lambda, then from lambda authenticate the webhook and forward the request to the Jenkins instance. One could also fron the API Gateway with an AWS WAF. But all these come with increased costs.
+Another viable option is to use AWS CloudFront and AWS WAF but this comes with increased costs: https://aws.amazon.com/blogs/compute/securing-lambda-function-urls-using-amazon-cognito-amazon-cloudfront-and-aws-waf/. Obviously IP filtering becomes obsolete in this case since it is handled by AWS WAF.
 
-Unfortunately, the AWS WAF cannot yet protect AWS Lambda urls directly for now...
+Unfortunately, the AWS WAF cannot yet protect AWS Lambda urls directly for now... one must use CloudFront in the middle.
