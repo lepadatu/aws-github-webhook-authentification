@@ -50,7 +50,7 @@ https://aws.amazon.com/blogs/aws/new-port-forwarding-using-aws-system-manager-se
 
 
 # Design Considerations
-Initially I have considered AWS API gateway as the best approach for the task together with proxy integration and lambda authorizer. In order to authenticate the webhook, one needs to access the payload in order to compute the HMAC signature. However, due to API Gateway limitations, the lambda authorizer cannot access the payload of the incoming request. 
+Initially I have considered AWS API gateway as the best approach for the task together with proxy integration and lambda authorizer. In order to authenticate the webhook, one needs to access the payload in order to re-generate the HMAC digest. However, due to API Gateway limitations, the lambda authorizer cannot access the payload of the incoming request. 
 
 Another viable option is to use AWS CloudFront and AWS WAF but this comes with increased costs: https://aws.amazon.com/blogs/compute/securing-lambda-function-urls-using-amazon-cognito-amazon-cloudfront-and-aws-waf/. Obviously IP filtering becomes obsolete in this case since it is handled by AWS WAF. But the issue in this case is the fact there is nothing to prevent users from accessing the function url directly but security by obscurity, since the url contains a long random string.
 
