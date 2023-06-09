@@ -43,8 +43,9 @@ The lambda function has been tested with `Python 3.9`.
 Only `application/json` Github webhooks content type is supported.
 
 # Connectivity Concerns
-Q: How to connect from outside AWS to a private Jenkins server when a NAT gateway is in place?
-A: Using Session Manager port forwarding. Simply forward Jenkins port. See the AWS blog post below for more details:
+Q: How to connect to Jenkins server running in a private subnet? The design does not allow inbound connections from the Internet.
+
+A: Using AWS Session Manager port forwarding. Simply forward Jenkins port. See the AWS blog post below for more details:
 https://aws.amazon.com/blogs/aws/new-port-forwarding-using-aws-system-manager-sessions-manager/
 
 
