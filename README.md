@@ -14,7 +14,7 @@ One option is to use ngrok-like tools, that have limitations in case of free var
 The solution presented here de-couples the GitHub webhook authentication part from Jenkins and runs is in an AWS Lambda function. The capabilities of the lambda function are:
 
 - GitHub webhook authentication
-- Source IP filtering using X-Forwarded-For header
+- Source IP filtering using `X-Forwarded-For` header
 - Forwarding the webhook to the relevant target once IP-filtered and authenticated
 
 The code hosted in [authorizer.py](authorizer.py) is purposed to run in a lambda function deployed in a VPC. This VPC does not need to coincide with Jenkins VPC as in the diagram below, but must be able to reach Jenkins instance in order to forward the webhook POST requests. As long as there is connectivity between lambda ENI and the service that processes the webhook (Jenkins), it should work.
@@ -24,7 +24,7 @@ The code hosted in [authorizer.py](authorizer.py) is purposed to run in a lambda
 
 The lambda functions requires 3 environment variables:
 1. `SECRET` is the shared secret with GitHub webhook.
-2. `TARGET_URL` is the target URL the lambda should forward the initial POST request to, inside AWS VPC.
+2. `TARGET_URL` is the target URL the lambda should forward the initial incoming POST request to, inside AWS VPC (in this particular case the Jenkins URL).
 3. `WHITELIST` is a comma-separated list of CIDR ranges.
 
 Since they contain sensitive information, it is highly recommended to use CMK (Customer-Managed Key)encryption in order to encrypt them. The key policy of the CMK can specify who can decrypt it:
@@ -41,6 +41,12 @@ In order to prevent abuse, it is recommended to limit concurrency as well.
 The lambda function has been tested with `Python 3.9`.
 
 Only `application/json` Github webhooks content type is supported.
+
+# Connectivity Concerns
+Q: How to connect from outside AWS to a private Jenkins server when a NAT gateway is in place?
+A: Using Session Manager port forwarding. Simply forward Jenkins port. See the AWS blog post below for more details:
+https://aws.amazon.com/blogs/aws/new-port-forwarding-using-aws-system-manager-sessions-manager/
+
 
 # Design Considerations
 Initially I have considered AWS API gateway as the best approach for the task together with proxy integration and lambda authorizer. In order to authenticate the webhook, one needs to access the payload in order to compute the HMAC signature. However, due to API Gateway limitations, the lambda authorizer cannot access the payload of the incoming request. 
